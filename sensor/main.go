@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
@@ -46,14 +49,20 @@ func main() {
 		}
 
 		if srcIP != "" && dstIP != "" {
+
 			event := map[string]string{
-				"src_ip": srcIP,
-				"dst_ip": dstIP,
-				"domain": domain,
+				"timestamp":      time.Now().Format(time.RFC3339),
+				"source_ip":      srcIP,
+				"destination_ip": dstIP,
+				"domain":         domain,
+				"method":         "GET",
 			}
 
 			jsonData, _ := json.Marshal(event)
-			fmt.Println(string(jsonData))
+
+			url := "http://localhost:8000/api/events"
+
+			http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 		}
 	}
 }
